@@ -1,0 +1,1308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sleepwalker – Walk the Talk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Inter:wght@400;500;600&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --charcoal:#121210;
+    --charcoal-2:#1b1a17;
+    --book-bg:#2b2a27;
+    --panel:#1f1e1a;
+    --concrete-light:#d9d5cb;
+    --concrete-mid:#9a9488;
+    --paper:#f4f1ea;
+    --shadow-slot:#2b2a25;
+    --shadow-slot-2:#242320;
+    --accent:#e1cffb;
+    --accent-text:#2a1f3d;
+    --accent-dim:#8a76b8;
+    --danger:#ef8d6e;
+    --danger-text:#33150a;
+    --radius-sm:10px;
+    --radius:16px;
+    --radius-lg:28px;
+    --ease-bounce: cubic-bezier(.34,1.56,.64,1);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    background:var(--charcoal);
+    color:var(--paper);
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--accent);color:#1a1a1a;}
+  button{font-family:inherit;}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+
+  /* ---------- SETUP BANNER ---------- */
+  .setup-banner{
+    display:none;
+    background:var(--accent);
+    color:#1a1a0f;
+    padding:12px 16px;
+    font-size:13px;
+    line-height:1.5;
+    text-align:center;
+    position:relative;
+    z-index:100;
+  }
+  .setup-banner.show{display:block;}
+  .setup-banner code{
+    background:rgba(0,0,0,0.15);
+    padding:2px 6px;
+    border-radius:3px;
+    font-size:12.5px;
+    user-select:all;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    background-image:url("bg.jpg");
+    background-size:cover;
+    background-position:center 40%;
+    overflow:hidden;
+    padding:24px;
+    text-align:center;
+  }
+  .hero::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg, rgba(10,10,9,0.05) 0%, rgba(10,10,9,0.55) 100%);
+    pointer-events:none;
+  }
+  .hero-inner{
+    position:relative;
+    z-index:2;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:30px;
+  }
+
+  /* ---------- SCRAMBLE WORDMARK ---------- */
+  .wordmark{
+    cursor:default;
+    user-select:none;
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    max-width:92vw;
+  }
+  .wordmark .char{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:clamp(28px, 6.4vw, 76px);
+    line-height:1;
+    color:var(--paper);
+    display:inline-block;
+    width:0.66em;
+    text-align:center;
+  }
+  .wordmark .cursor{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:clamp(28px, 6.4vw, 76px);
+    color:var(--accent);
+    animation:blink 1.1s steps(1) infinite;
+  }
+  @keyframes blink{
+    0%,49%{opacity:1;}
+    50%,100%{opacity:0;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .wordmark .cursor{animation:none; opacity:1;}
+  }
+
+  .hero-caption{
+    font-size:clamp(11px, 3.2vw, 13px);
+    letter-spacing:.04em;
+    color:var(--paper);
+    max-width:100%;
+  }
+
+  .cta{
+    appearance:none;
+    border:1px solid rgba(244,241,234,0.35);
+    background:rgba(244,241,234,0.06);
+    backdrop-filter:blur(6px);
+    color:var(--paper);
+    padding:14px 28px;
+    font-size:15px;
+    font-weight:500;
+    border-radius:999px;
+    cursor:pointer;
+    transition:background .2s ease, border-color .2s ease, color .2s ease, transform .2s ease;
+  }
+  .cta:hover{background:rgba(244,241,234,0.14);border-color:rgba(244,241,234,0.6);}
+  .cta.hover-hit{border-color:transparent;}
+  .cta:active{transform:scale(0.98);}
+
+  .scroll-hint{
+    position:absolute;
+    bottom:28px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:2;
+    animation:bob 2.4s ease-in-out infinite;
+  }
+  @keyframes bob{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(6px);}}
+  @media (prefers-reduced-motion: reduce){ .scroll-hint{animation:none;} }
+
+  /* ---------- PAD SELECTOR ---------- */
+  .pad-strip{
+    display:flex;
+    justify-content:center;
+    gap:clamp(20px, 5vw, 48px);
+    margin-bottom:48px;
+    pointer-events:auto;
+  }
+  .pad-circle{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    cursor:pointer;
+    gap:0;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .pad-ring{
+    width:112px;
+    height:112px;
+    border-radius:50%;
+    border:2.5px solid var(--ring-color, #9a9488);
+    background:var(--book-bg);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    transition:transform .18s cubic-bezier(.34,1.56,.64,1), border-color .4s ease;
+    position:relative;
+  }
+  .pad-circle:hover .pad-ring{ transform:scale(1.06); }
+  .pad-circle.disabled{
+    pointer-events:none;
+    cursor:default;
+    position:relative;
+  }
+  .pad-circle.disabled .pad-ring{
+    filter:blur(2px);
+    opacity:0.45;
+  }
+  .pad-circle.disabled .pad-ring-slots{
+    filter:blur(2px);
+  }
+  .pad-coming-soon{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-family:'JetBrains Mono',monospace;
+    font-size:9.5px;
+    font-weight:500;
+    letter-spacing:.03em;
+    color:var(--paper);
+    line-height:1.4;
+    padding:0 10px;
+    pointer-events:none;
+    z-index:2;
+  }
+
+  .pad-circle.active .pad-ring{
+    outline:2px solid rgba(244,241,234,0.22);
+    outline-offset:5px;
+  }
+  .pad-ring-name{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:.1em;
+    color:var(--paper);
+  }
+  .pad-ring-slots{
+    font-size:10px;
+    color:#9a9488;
+    margin-top:4px;
+    opacity:0;
+    transition:opacity .5s ease;
+    white-space:nowrap;
+  }
+  .pad-ring-slots.visible{ opacity:1; }
+
+  /* ---------- BOOKING SECTION ---------- */
+  .book{
+    background:var(--book-bg);
+    padding:72px 20px 100px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .book-panel{
+    width:100%;
+    max-width:900px;
+  }
+  .book-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:14px;
+    margin-bottom:28px;
+  }
+  .book-title{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:26px;
+    margin:0;
+  }
+  .book-sub{
+    font-size:13px;
+    color:var(--concrete-mid);
+    margin-top:6px;
+  }
+  .book-sub a{
+    color:var(--accent);
+    text-decoration:underline;
+    text-underline-offset:2px;
+  }
+  .book-sub a:hover{color:var(--paper);}
+  .week-nav{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:14px;
+    color:var(--concrete-mid);
+  }
+  .week-nav button{
+    width:32px;height:32px;
+    border-radius:50%;
+    border:1px solid rgba(244,241,234,0.2);
+    background:transparent;
+    color:var(--paper);
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .week-nav button:hover{border-color:var(--accent);background:rgba(225,207,251,0.1);}
+  .week-range{min-width:140px;text-align:center;color:var(--paper);font-weight:500;}
+
+
+
+  /* Calendar layout: time labels live in their own gutter to the left,
+     outside the grid. The 5 day columns fill the full panel width. */
+  .grid-wrap{width:100%;overflow-x:auto;display:flex;align-items:flex-start;gap:6px;}
+  .grid-area{flex:1 1 auto;min-width:480px;}
+  table.grid{
+    width:100%;
+    border-collapse:separate;
+    border-spacing:4px;
+    table-layout:fixed;
+  }
+  table.grid tbody tr{height:38px;}
+  table.time-gutter{
+    flex:0 0 56px;
+    width:56px;
+    border-collapse:separate;
+    border-spacing:0 4px;
+    table-layout:fixed;
+  }
+  table.time-gutter th{
+    font-weight:500;font-size:13px;padding:6px 0 10px;visibility:hidden;
+  }
+  table.time-gutter th .day-date{display:block;font-size:11px;margin-top:2px;}
+  table.time-gutter td{
+    height:38px;padding:0 4px 0 0;
+    font-size:12px;color:var(--concrete-mid);
+    text-align:right;vertical-align:middle;white-space:nowrap;
+  }
+  /* On wide screens the gutter hangs outside the panel edge, so the
+     day grid lines up exactly with the title and legend above it. */
+  @media (min-width:1040px){
+    .grid-wrap{width:calc(100% + 62px);margin-left:-62px;}
+  }
+  table.grid th{
+    font-weight:500;
+    font-size:13px;
+    color:var(--concrete-mid);
+    padding:6px 4px 10px;
+    text-align:center;
+  }
+  table.grid th .day-date{display:block;font-size:11px;color:var(--concrete-mid);opacity:.7;margin-top:2px;}
+  table.grid td{padding:0;vertical-align:middle;position:relative;height:38px;}
+  .slot{
+    position:absolute;
+    inset:0;
+    border-radius:var(--radius);
+    background:var(--concrete-light);
+    cursor:pointer;
+    transition:transform .12s ease, filter .12s ease;
+  }
+  .slot:hover{filter:brightness(1.08);transform:translateY(-1px);}
+  .slot.booked{background:var(--accent);cursor:pointer;}
+  .slot.booked:hover{filter:brightness(1.06);}
+  .slot.linked{background:var(--shadow-slot-2);cursor:default;}
+  .slot.linked:hover{transform:none;filter:none;}
+  .slot.past{background:var(--charcoal-2);cursor:not-allowed;opacity:.55;}
+  .slot.past:hover{transform:none;filter:none;}
+  .slot-name{
+    position:absolute;top:0;bottom:0;left:15%;right:15%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:10.5px;color:var(--accent-text);font-weight:600;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+
+  .mobile-days{display:none;}
+  .day-pills{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;margin-bottom:14px;}
+  .day-pill{
+    flex:0 0 auto;
+    border:1px solid rgba(244,241,234,0.2);
+    background:transparent;color:var(--paper);
+    padding:8px 14px;border-radius:999px;font-size:13px;cursor:pointer;
+  }
+  .day-pill.active{background:var(--paper);color:#1a1a1a;border-color:var(--paper);}
+  .slot-row{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:12px 14px;background:var(--concrete-light);color:#1a1a1a;
+    border-radius:var(--radius);margin-bottom:6px;cursor:pointer;
+  }
+  .slot-row.booked{background:var(--accent);color:var(--accent-text);}
+  .slot-row.merged{padding-top:16px;padding-bottom:16px;}
+  .slot-row.linked{background:var(--shadow-slot-2);color:var(--concrete-mid);cursor:default;}
+  .slot-row.past{background:var(--charcoal-2);color:var(--concrete-mid);opacity:.6;cursor:not-allowed;}
+  .slot-row .t{font-weight:500;font-size:14px;}
+  .slot-row .who{font-size:12.5px;opacity:.85;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+  .slot-row .t{flex-shrink:0;margin-right:12px;}
+
+  @media (max-width:680px){
+    .grid-wrap{display:none;}
+    .mobile-days{display:block;}
+  }
+
+  footer{text-align:center;padding:24px;font-size:12px;color:var(--concrete-mid);font-family:'Special Elite',monospace;letter-spacing:.03em;}
+
+  /* ---------- MODAL ---------- */
+  .overlay{
+    position:fixed;inset:0;
+    background:rgba(8,8,7,0.65);
+    backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;
+    z-index:50;padding:20px;overflow-y:auto;
+  }
+  .overlay.show{display:flex;}
+  .modal{
+    background:var(--panel);
+    border:1px solid rgba(244,241,234,0.14);
+    border-radius:var(--radius-lg);padding:39px;width:100%;max-width:510px;
+    max-height:calc(100dvh - 40px);overflow-y:auto;
+    text-align:center;
+    box-shadow:0 24px 70px rgba(0,0,0,0.5);
+  }
+  .modal h3{margin:0 0 4px;font-family:'JetBrains Mono',monospace;font-size:23px;font-weight:700;}
+  .modal .modal-sub{color:var(--concrete-mid);font-size:15px;margin-bottom:24px;}
+  .field{margin-bottom:18px;text-align:left;}
+  .field label{display:block;font-size:13px;color:var(--concrete-mid);margin-bottom:7px;}
+  .field input[type=text]{
+    width:100%;background:var(--charcoal-2);
+    border:1px solid rgba(244,241,234,0.22);color:var(--paper);
+    padding:12px 14px;border-radius:var(--radius-sm);font-size:16px;
+  }
+  .field input[type=text]:focus{border-color:var(--accent);}
+  .dur-toggle{display:flex;gap:8px;}
+  .dur-btn{
+    flex:1;padding:13px;background:var(--charcoal-2);
+    border:1px solid rgba(244,241,234,0.18);color:var(--paper);
+    border-radius:999px;cursor:pointer;font-size:16px;
+  }
+  .dur-btn.active{background:var(--accent);border-color:var(--accent);color:#1a1a0f;font-weight:600;}
+  .modal-actions{display:flex;gap:10px;margin-top:26px;}
+  .btn-primary,.btn-ghost,.btn-danger{flex:1;padding:14px;border-radius:999px;font-size:16px;cursor:pointer;border:1px solid transparent;}
+  .btn-primary{background:var(--paper);color:#1a1a1a;font-weight:600;}
+  .btn-primary:hover{background:var(--accent);}
+  .btn-ghost{background:transparent;border-color:rgba(244,241,234,0.25);color:var(--paper);}
+  .btn-ghost:hover{border-color:var(--paper);}
+  .btn-danger{background:var(--danger);color:var(--danger-text);font-weight:600;}
+  .btn-danger:hover{filter:brightness(1.08);}
+  .modal-error{color:var(--danger);font-size:14px;margin-top:-8px;margin-bottom:14px;min-height:0;}
+  .booked-info{font-size:16px;line-height:1.5;color:var(--paper);margin-bottom:24px;}
+  .booked-info b{color:var(--accent);}
+
+  /* ---------- TOAST ---------- */
+  .toast{
+    position:fixed;left:50%;bottom:26px;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--paper);color:#1a1a1a;
+    padding:12px 20px;border-radius:var(--radius-lg);font-size:14px;font-weight:500;
+    opacity:0;pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;
+    z-index:80;box-shadow:0 10px 30px rgba(0,0,0,0.35);
+    max-width:90vw;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast.error{background:var(--danger);color:#1a1a0f;}
+
+  /* ---------- BLUR / PASSWORD LOCK ---------- */
+  #page-content{
+    transition:filter .4s ease;
+  }
+  #page-content.locked{
+    filter:blur(22px) brightness(0.7);
+    pointer-events:none;
+    user-select:none;
+    height:100vh;
+    overflow:hidden;
+  }
+  .lock-screen{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:200;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:rgba(10,10,9,0.55);
+  }
+  .lock-screen.show{display:flex;}
+  .lock-box{
+    background:var(--panel);
+    border:1px solid rgba(244,241,234,0.14);
+    border-radius:var(--radius-lg);
+    padding:30px 30px;
+    width:100%;
+    max-width:360px;
+    text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  }
+  .lock-box h2{
+    font-family:'JetBrains Mono',monospace;
+    font-size:18px;
+    font-weight:700;
+    margin:0 0 6px;
+  }
+  .lock-box p{
+    font-size:13px;
+    color:var(--concrete-mid);
+    margin:0 0 20px;
+  }
+  .lock-box input[type=password]{
+    width:100%;
+    background:var(--charcoal-2);
+    border:1px solid rgba(244,241,234,0.18);
+    color:var(--paper);
+    padding:11px 12px;
+    border-radius:var(--radius-sm);
+    font-size:15px;
+    text-align:center;
+    letter-spacing:.08em;
+    margin-bottom:12px;
+  }
+  .lock-box input[type=password]:focus{border-color:var(--accent);}
+  .lock-box.shake{animation:shake .4s ease;}
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    20%{transform:translateX(-8px);}
+    40%{transform:translateX(8px);}
+    60%{transform:translateX(-5px);}
+    80%{transform:translateX(5px);}
+  }
+  .lock-error{
+    color:var(--danger);
+    font-size:12.5px;
+    min-height:16px;
+    margin-bottom:8px;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .lock-box.shake{animation:none;}
+    #page-content{transition:none;}
+  }
+
+  /* ---------- SPOTLIGHT CURSOR (matches AnchorWeb-light-v9) ---------- */
+  #spotlight-cursor{
+    position:fixed;
+    top:-85px; left:-85px;
+    width:170px;
+    height:170px;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(var(--accent-rgb),.12) 0%, transparent 70%);
+    pointer-events:none;
+    z-index:9999;
+    opacity:0;
+    transition:width .28s cubic-bezier(.3,0,0,1), height .28s cubic-bezier(.3,0,0,1), opacity .2s;
+    will-change:transform;
+  }
+  #spotlight-cursor.show{opacity:1;}
+  #spotlight-cursor.is-pointer{width:120px;height:120px;margin:25px;}
+  @media (hover:none){ #spotlight-cursor{display:none;} }
+</style>
+</head>
+<body>
+
+  <div class="lock-screen" id="lock-screen">
+    <div class="lock-box" id="lock-box">
+      <h2>walking-pad --locked</h2>
+      <p>Enter the team password to continue.</p>
+      <form id="lock-form">
+        <input type="password" id="lock-input" aria-label="Team password" placeholder="Password" autocomplete="off" />
+        <div class="lock-error" id="lock-error" role="alert"></div>
+        <button type="submit" class="btn-primary" style="width:100%;">Unlock</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="page-content" class="locked" inert>
+
+  <div class="setup-banner" id="setup-banner"></div>
+
+  <section class="hero" id="top">
+    <div class="hero-inner">
+      <div class="wordmark" id="wordmark" aria-label="SLEEPWALKER"></div>
+      <p class="hero-caption">Three walking pads. Shared by everyone. Pick yours and walk.</p>
+      <button class="cta" id="cta-book">Book Your Slot</button>
+    </div>
+    <div class="scroll-hint" aria-hidden="true">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f4f1ea" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+  </section>
+
+  <section class="book" id="booking">
+    <div class="pad-strip" id="pad-strip" role="group" aria-label="Select a walking pad"></div>
+    <div class="book-panel">
+      <div class="book-head">
+        <div>
+          <h2 class="book-title">WEEKLY CALENDAR</h2>
+          <div class="book-sub">There is no Traffic Manager on this project, so if anything goes wrong, contact <a href="mailto:oh-no@anyway.ae">oh-no@anyway.ae</a>.</div>
+        </div>
+        <div class="week-nav">
+          <button id="prev-week" aria-label="Previous week">←</button>
+          <span class="week-range" id="week-range"></span>
+          <button id="next-week" aria-label="Next week">→</button>
+        </div>
+      </div>
+
+
+
+      <p id="calendar-status" class="book-sub" role="status">Connecting to shared calendar…</p>
+      <div class="grid-wrap">
+        <table class="time-gutter" id="time-gutter" aria-hidden="true"></table>
+        <div class="grid-area">
+          <table class="grid" id="grid"></table>
+        </div>
+      </div>
+
+      <div class="mobile-days" id="mobile-days">
+        <div class="day-pills" id="day-pills"></div>
+        <div id="day-slot-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>SLEEPWALKER - BE KIND TO YOURSELF</footer>
+
+  <div class="overlay" id="overlay">
+    <div class="modal" id="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-title"></div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  </div><!-- /#page-content -->
+
+<script>
+(function(){
+  /* =========================================================
+     ACCENT PALETTE
+     -----------------------------------------------------------
+     Every time the page loads, one of these 4 colors is picked
+     at random and used everywhere --accent is used (buttons,
+     focus rings, booked slots, duration toggle, etc.), nothing
+     else on the page changes.
+  ========================================================= */
+  const ACCENT_PALETTE = [
+    { accent:'#e1cffb', text:'#241b33', rgb:'225,207,251' }, // lavender
+    { accent:'#fbe8ac', text:'#332b12', rgb:'251,232,172' }, // yellow
+    { accent:'#d4ebb2', text:'#1f2e12', rgb:'212,235,178' }, // green
+    { accent:'#ef8d6e', text:'#33150a', rgb:'239,141,110' }  // coral
+  ];
+  // Deterministic: the same name always lands on the same color, but which
+  // color a given name gets still looks essentially random (a simple string
+  // hash), not a fixed lookup table.
+  function colorIndexForName(name){
+    let h = 0;
+    const s = String(name || '');
+    for (let i = 0; i < s.length; i++){
+      h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    }
+    return h % ACCENT_PALETTE.length;
+  }
+  (function applyRandomAccent(){
+    const pick = ACCENT_PALETTE[Math.floor(Math.random() * ACCENT_PALETTE.length)];
+    const root = document.documentElement.style;
+    root.setProperty('--accent', pick.accent);
+    root.setProperty('--accent-text', pick.text);
+    root.setProperty('--accent-rgb', pick.rgb);
+  })();
+
+  /* =========================================================
+     SPOTLIGHT CURSOR
+     -----------------------------------------------------------
+     Ported from AnchorWeb-light-v9: a soft orb eases toward the
+     pointer (not a rigid snap) and shrinks over anything
+     clickable. Colored with this session's accent. Off for
+     touch devices and reduced-motion users.
+  ========================================================= */
+  (function initSpotlight(){
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (window.matchMedia && !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+    const cursor = document.createElement('div');
+    cursor.id = 'spotlight-cursor';
+    document.body.appendChild(cursor);
+
+    const sel = 'button, a, input, .slot, .slot-row, .day-pill, .wordmark, [role="button"]';
+    let hovering = false, frameId = null;
+    let mx = innerWidth / 2, my = innerHeight / 2, cx = mx, cy = my;
+
+    document.addEventListener('mousemove', (e) => {
+      mx = e.clientX; my = e.clientY;
+      cursor.classList.add('show');
+      if (frameId === null) frameId = requestAnimationFrame(loop);
+      const hit = e.target.closest ? e.target.closest(sel) : null;
+      const h = !!hit;
+      if (h !== hovering){ hovering = h; cursor.classList.toggle('is-pointer', h); }
+    }, { passive:true });
+    function stop(){
+      cursor.classList.remove('show');
+      cancelAnimationFrame(frameId);
+      frameId = null;
+    }
+    document.addEventListener('mouseleave', stop);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); });
+    function loop(){
+      cx += (mx - cx) * 0.18;
+      cy += (my - cy) * 0.18;
+      cursor.style.transform = `translate(${cx}px,${cy}px)`;
+      frameId = Math.abs(mx-cx) + Math.abs(my-cy) > 0.2 ? requestAnimationFrame(loop) : null;
+    }
+  })();
+
+  // Shared calendar: Netlify Functions + Postgres. Never fall back to local bookings.
+  const API = '/api/bookings';
+  let authenticated = false;
+  async function api(path='', body){
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(),15000);
+    try {
+      const response = await fetch(API+path,{
+        method:body ? 'POST':'GET', credentials:'same-origin', cache:'no-store',
+        headers:body ? {'Content-Type':'application/json'} : {},
+        body:body ? JSON.stringify(body) : undefined, signal:controller.signal
+      });
+      let data;
+      try {data=await response.json();} catch {throw new Error('Shared booking service is unavailable. The Netlify server functions must be deployed with the site.');}
+      if (!response.ok){
+        const error = new Error(data.error || 'Could not reach shared storage.');
+        error.status=response.status;
+        throw error;
+      }
+      return data;
+    } catch(e){
+      if(e.name==='AbortError' || e instanceof TypeError) throw new Error('Connection interrupted. Check your connection and retry.');
+      throw e;
+    } finally {clearTimeout(timer);}
+  }
+  function unlockPage(){
+    authenticated=true;
+    document.getElementById('page-content').classList.remove('locked');
+    document.getElementById('page-content').inert=false;
+    document.getElementById('lock-screen').classList.remove('show');
+    document.getElementById('lock-input').value='';
+    refreshAvailability();
+  }
+  async function initLock(){
+    const screen=document.getElementById('lock-screen');
+    const input=document.getElementById('lock-input');
+    const error=document.getElementById('lock-error');
+    const form=document.getElementById('lock-form');
+    screen.classList.add('show');
+    form.addEventListener('submit',async e=>{
+      e.preventDefault();
+      const button=form.querySelector('button');
+      if(button.disabled)return;
+      button.disabled=true; error.textContent='';
+      try {await api('',{action:'login',password:input.value});unlockPage();}
+      catch(e){error.textContent=e.message;input.focus();}
+      finally{button.disabled=false;}
+    });
+    try{await api('?action=session');unlockPage();}
+    catch(e){if(e.status!==401)error.textContent=e.message;input.focus();}
+  }
+  // Calendar dates and start times always use the office's Dubai time zone.
+  function businessNow(){
+    const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Dubai',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(new Date());
+    const v=Object.fromEntries(parts.map(p=>[p.type,p.value]));
+    return new Date(+v.year,+v.month-1,+v.day,+v.hour,+v.minute,+v.second);
+  }
+
+  const PADS = ['SWIFT','TEMPO','PACER'];
+  let selectedPad = PADS[0];
+  let sharedPads={SWIFT:{},TEMPO:{},PACER:{}};
+  let calendarReady=false;
+  let loading=false;
+  let loadVersion=0;
+  function readBookings(pad=selectedPad){return sharedPads[pad] || {};}
+  function calendarStatus(text){document.getElementById('calendar-status').textContent=text;}
+
+  /* =========================================================
+     SCRAMBLE WORDMARK (looping decode-in effect)
+  ========================================================= */
+  const WORD = 'SLEEPWALKER';
+  const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#%&*+=-/\\<>';
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let cursorEl = null;
+
+  function buildWordmark(){
+    const el = document.getElementById('wordmark');
+    el.innerHTML = '';
+    WORD.split('').forEach((ch) => {
+      const span = document.createElement('span');
+      span.className = 'char';
+      span.textContent = ch;
+      el.appendChild(span);
+    });
+    const cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    cursor.textContent = '_';
+    el.appendChild(cursor);
+    cursorEl = cursor;
+    return el.querySelectorAll('.char');
+  }
+
+  function randChar(){ return SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)]; }
+
+  let scrambleFrame = null;
+  function runScramble(chars){
+    if (document.hidden || document.getElementById('wordmark').getBoundingClientRect().bottom < 0) return;
+    cancelAnimationFrame(scrambleFrame);
+    if (cursorEl) cursorEl.style.color = ACCENT_PALETTE[Math.floor(Math.random()*ACCENT_PALETTE.length)].accent;
+    const start = performance.now();
+    let last = -40;
+    function step(now){
+      const elapsed = now - start;
+      if (document.hidden){ chars.forEach((span,i) => span.textContent = WORD[i]); return; }
+      if (elapsed-last >= 40){
+        chars.forEach((span,i) => { span.textContent = elapsed >= i*65+550 ? WORD[i] : elapsed >= i*65 ? randChar() : WORD[i]; });
+        last = elapsed;
+      }
+      if (elapsed < (WORD.length-1)*65+550) scrambleFrame = requestAnimationFrame(step);
+      else chars.forEach((span,i) => span.textContent = WORD[i]);
+    }
+    scrambleFrame = requestAnimationFrame(step);
+  }
+
+  function initWordmark(){
+    const chars = buildWordmark();
+    if (reduceMotion){
+      return; // static text already set, no looping
+    }
+    runScramble(chars);
+    setInterval(() => runScramble(chars), 4800);
+    document.getElementById('wordmark').addEventListener('click', () => runScramble(chars));
+  }
+
+  /* =========================================================
+     BOOKING LOGIC
+  ========================================================= */
+  let bookings = {};
+  let weekOffset = 0;
+  let selectedMobileDayIndex = Math.min(4, Math.max(0, businessNow().getDay()-1));
+  let modalCtx = null;
+
+  const TIMES = (() => {
+    const arr = [];
+    for (let mins = 9*60; mins < 18*60; mins += 30){
+      const h = Math.floor(mins/60), m = mins%60;
+      arr.push(String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0'));
+    }
+    return arr;
+  })();
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function isoOf(d){ return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); }
+  function getMonday(base){
+    const d = new Date(base);
+    const day = d.getDay();
+    const diff = (day === 0 ? -6 : 1 - day);
+    d.setDate(d.getDate() + diff);
+    d.setHours(0,0,0,0);
+    return d;
+  }
+  function addDays(d, n){ const r = new Date(d); r.setDate(r.getDate()+n); return r; }
+  function timeToMinutes(t){ const [h,m] = t.split(':').map(Number); return h*60+m; }
+  function minutesToTime(m){ return pad(Math.floor(m/60)) + ':' + pad(m%60); }
+  function slotDate(iso, time){
+    const [y,mo,da] = iso.split('-').map(Number);
+    const [h,mi] = time.split(':').map(Number);
+    return new Date(y, mo-1, da, h, mi, 0, 0);
+  }
+  function keyOf(iso, time){ return iso + '_' + time; }
+
+  const DAY_NAMES = ['Mon','Tue','Wed','Thu','Fri'];
+  const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let currentWeekDays = [];
+
+  function computeWeek(){
+    const monday = addDays(getMonday(businessNow()), weekOffset*7);
+    currentWeekDays = [];
+    for (let i=0;i<5;i++){
+      const d = addDays(monday, i);
+      currentWeekDays.push({ date:d, iso:isoOf(d), label:DAY_NAMES[i], dayNum:d.getDate(), month:MONTH_NAMES[d.getMonth()] });
+    }
+    const first = currentWeekDays[0], last = currentWeekDays[4];
+    const rangeEl = document.getElementById('week-range');
+    rangeEl.textContent = first.month === last.month
+      ? first.month + ' ' + first.dayNum + '–' + last.dayNum
+      : first.month + ' ' + first.dayNum + ' – ' + last.month + ' ' + last.dayNum;
+  }
+
+  function slotInfo(iso, time){
+    const key = keyOf(iso, time);
+    const entry = bookings[key];
+    const now = businessNow();
+    const dt = slotDate(iso, time);
+    const isPast = dt < now;
+    if (entry && entry.linked){
+      return { status:'linked', name: bookings[entry.start] ? bookings[entry.start].name : '', key, isPast };
+    }
+    if (entry){
+      return { status:'booked', name: entry.name, duration: entry.duration, colorIndex: colorIndexForName(entry.name), key, isPast };
+    }
+    if (isPast) return { status:'past', key, isPast };
+    if (!calendarReady) return {status:'unavailable',key,isPast};
+    return { status:'open', key, isPast };
+  }
+
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function renderGrid(){
+    const table = document.getElementById('grid');
+
+    // Time gutter: a separate table outside the grid. Its hidden header
+    // copies a real day header so both tables share the same header height,
+    // and every row matches the grid's 38px rows and 4px spacing.
+    const gutter = document.getElementById('time-gutter');
+    const d0 = currentWeekDays[0];
+    let g = `<thead><tr><th>${d0.label}<span class="day-date">${d0.month} ${d0.dayNum}</span></th></tr></thead><tbody>`;
+    TIMES.forEach(time => { g += `<tr><td>${time}</td></tr>`; });
+    gutter.innerHTML = g + '</tbody>';
+
+    let html = '<thead><tr>';
+    currentWeekDays.forEach(d => {
+      html += `<th>${d.label}<span class="day-date">${d.month} ${d.dayNum}</span></th>`;
+    });
+    html += '</tr></thead><tbody>';
+
+    // Precompute which (day,time) cells are the *second half* of a 60-min
+    // booking, those get skipped entirely so the first half's rowspan="2"
+    // cell can cover both rows as a single merged box.
+    const skip = new Set();
+    currentWeekDays.forEach(d => {
+      TIMES.forEach(time => {
+        if (slotInfo(d.iso, time).status === 'linked') skip.add(d.iso + '_' + time);
+      });
+    });
+
+    TIMES.forEach(time => {
+      html += '<tr>';
+      currentWeekDays.forEach(d => {
+        if (skip.has(d.iso + '_' + time)) return; // covered by rowspan above
+
+        const info = slotInfo(d.iso, time);
+        let cls = 'slot', title = 'Open, tap to book', content = '', style = '';
+        let rowspan = 1;
+        if (info.status === 'booked'){
+          cls += ' booked';
+          title = info.name + ' · ' + info.duration + ' min';
+          const c = ACCENT_PALETTE[info.colorIndex] || null;
+          if (c){ style = ` style="background:${c.accent}"`; }
+          const nameStyle = c ? ` style="color:${c.text}"` : '';
+          content = `<span class="slot-name"${nameStyle}>${escapeHtml(info.name)}</span>`;
+          if (info.duration === 60) rowspan = 2;
+        }
+        else if (info.status === 'past' || info.status === 'unavailable'){ cls += ' past'; title = info.status === 'past' ? 'Past' : 'Checking availability'; }
+        html += `<td rowspan="${rowspan}"><div class="${cls}"${style} role="button" tabindex="${['past','unavailable'].includes(info.status) ? -1 : 0}" aria-disabled="${['past','unavailable'].includes(info.status)}" aria-label="${escapeHtml(d.label + ' ' + time + ', ' + title)}" data-iso="${d.iso}" data-time="${time}" data-status="${info.status}">${content}</div></td>`;
+      });
+      html += '</tr>';
+    });
+    html += '</tbody>';
+    table.innerHTML = html;
+
+    table.querySelectorAll('.slot').forEach(el => {
+      el.addEventListener('click', onSlotActivate);
+      el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); onSlotActivate(e); } });
+    });
+  }
+
+  function renderMobile(){
+    const pillsWrap = document.getElementById('day-pills');
+    pillsWrap.innerHTML = currentWeekDays.map((d,i) =>
+      `<button class="day-pill ${i===selectedMobileDayIndex?'active':''}" data-idx="${i}" aria-pressed="${i===selectedMobileDayIndex}">${d.label} ${d.dayNum}</button>`
+    ).join('');
+    pillsWrap.querySelectorAll('.day-pill').forEach(btn => {
+      btn.addEventListener('click', () => { selectedMobileDayIndex = Number(btn.dataset.idx); renderMobile(); document.querySelector(`.day-pill[data-idx="${selectedMobileDayIndex}"]`).focus({preventScroll:true}); });
+    });
+
+    const d = currentWeekDays[selectedMobileDayIndex];
+    const listWrap = document.getElementById('day-slot-list');
+    const rows = [];
+    for (let i = 0; i < TIMES.length; i++){
+      const time = TIMES[i];
+      const info = slotInfo(d.iso, time);
+      if (info.status === 'linked') continue; // already folded into the previous row
+
+      let cls = 'slot-row', who = 'Open', clickable = true, label = time, rowStyle = '';
+      if (info.status === 'booked'){
+        cls += ' booked';
+        who = info.name;
+        const c = ACCENT_PALETTE[info.colorIndex] || null;
+        if (c){ rowStyle = ` style="background:${c.accent};color:${c.text}"`; }
+        if (info.duration === 60){
+          cls += ' merged';
+          const endLabel = minutesToTime(timeToMinutes(time) + 60);
+          label = time + '–' + endLabel;
+        }
+      }
+      else if (info.status === 'past' || info.status === 'unavailable'){ cls += ' past'; who = info.status === 'past' ? 'Past' : 'Checking availability'; clickable = false; }
+
+      rows.push(`<div class="${cls}"${rowStyle} data-iso="${d.iso}" data-time="${time}" data-status="${info.status}" role="button" tabindex="${clickable?0:-1}" aria-disabled="${!clickable}">
+        <span class="t">${label}</span><span class="who">${escapeHtml(who)}</span>
+      </div>`);
+    }
+    listWrap.innerHTML = rows.join('');
+    listWrap.querySelectorAll('.slot-row').forEach(el => {
+      el.addEventListener('click', onSlotActivate);
+      el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); onSlotActivate(e); } });
+    });
+  }
+
+  /* ---- ring color thresholds ---- */
+  function ringColor(freeCount){
+    if (freeCount >= 10) return '#d4ebb2';  /* green  */
+    if (freeCount >= 5)  return '#fbe8ac';  /* yellow */
+    return '#ef8d6e';                        /* red    */
+  }
+
+  function freeSlotsToday(pad){
+    const todayIso = isoOf(businessNow());
+    const now = businessNow();
+    if (!calendarReady) return 0;
+    if (now.getDay() === 0 || now.getDay() === 6) return 0;
+    const bk = readBookings(pad);
+    let free = 0;
+    TIMES.forEach(t => {
+      const key = keyOf(todayIso, t);
+      const dt = slotDate(todayIso, t);
+      if (dt > now && !bk[key]) free++;
+    });
+    return free;
+  }
+
+  let padObserver = null;
+  function buildPadStrip(){
+    if (padObserver) padObserver.disconnect();
+    const strip = document.getElementById('pad-strip');
+    strip.innerHTML = '';
+    const DISABLED_PADS = ['TEMPO','PACER'];  /* remove pad name here to re-enable */
+    PADS.forEach(pad => {
+      const isDisabled = DISABLED_PADS.includes(pad);
+      const free = freeSlotsToday(pad);
+      const col = ringColor(free);
+      const div = document.createElement('div');
+      div.dataset.pad = pad;
+      div.className = 'pad-circle' + (pad === selectedPad ? ' active' : '') + (isDisabled ? ' disabled' : '');
+      div.setAttribute('role','button');
+      div.setAttribute('tabindex',isDisabled ? '-1' : '0');
+      div.setAttribute('aria-disabled', String(isDisabled));
+      div.setAttribute('aria-label', pad + ', ' + free + ' slots free today');
+      div.innerHTML =
+        '<div class="pad-ring" style="--ring-color:' + col + '">' +
+          '<span class="pad-ring-name">' + pad + '</span>' +
+          '<span class="pad-ring-slots">' + free + ' free today</span>' +
+        '</div>';
+      if (!isDisabled){
+        div.addEventListener('click', () => selectPad(pad));
+        div.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); selectPad(pad); } });
+      }
+      if (isDisabled){
+        const overlay = document.createElement('div');
+        overlay.className = 'pad-coming-soon';
+        overlay.textContent = 'Potentially Coming Soon. Maybe.';
+        div.appendChild(overlay);
+      }
+      strip.appendChild(div);
+    });
+    /* IntersectionObserver: fade slot counts in once circles enter viewport */
+    const slots = strip.querySelectorAll('.pad-ring-slots');
+    if ('IntersectionObserver' in window){
+      const io = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting){ slots.forEach(s => s.classList.add('visible')); io.disconnect(); }
+        });
+      }, { threshold: 0.5 });
+      padObserver = io;
+      io.observe(strip);
+    } else { slots.forEach(s => s.classList.add('visible')); }
+  }
+
+  function updatePadCounts(){
+    document.querySelectorAll('.pad-circle').forEach(el => {
+      const free = freeSlotsToday(el.dataset.pad);
+      el.setAttribute('aria-label',el.dataset.pad + ', ' + free + ' slots free today');
+      el.querySelector('.pad-ring').style.setProperty('--ring-color',ringColor(free));
+      el.querySelector('.pad-ring-slots').textContent = calendarReady ? free + ' free today' : 'Checking…';
+    });
+  }
+
+  function selectPad(pad){
+    selectedPad = pad;
+    bookings = readBookings(pad);
+    buildPadStrip();
+    render();
+    /* update book-sub label */
+    const sub = document.querySelector('.book-sub');
+    if (sub) sub.dataset.pad = pad;
+  }
+
+  function render(){
+    const active = document.activeElement;
+    const iso = active && active.dataset.iso, time = active && active.dataset.time;
+    const mobile = active && active.classList.contains('slot-row');
+    computeWeek();
+    renderGrid();
+    renderMobile();
+    if (iso && time){
+      const replacement = document.querySelector(`${mobile ? '.slot-row' : '.slot'}[data-iso="${iso}"][data-time="${time}"]`);
+      if (replacement) replacement.focus({preventScroll:true});
+    }
+  }
+
+  function onSlotActivate(e){
+    const el = e.currentTarget;
+    bookings = readBookings();
+    if (!calendarReady){showToast('Wait for shared availability to load.',true);return;}
+    const status = slotInfo(el.dataset.iso, el.dataset.time).status;
+    if (status === 'past' || status === 'linked') return;
+    const iso = el.dataset.iso, time = el.dataset.time;
+    if (status === 'booked') openCancelModal(iso, time);
+    else openBookModal(iso, time);
+  }
+
+  function dateLabelFor(iso){
+    const d = currentWeekDays.find(w => w.iso === iso);
+    return d ? (d.label + ', ' + d.month + ' ' + d.dayNum) : iso;
+  }
+
+  function openBookModal(iso, time){
+    modalCtx = { mode:'book', iso, time, duration:30, pad:selectedPad, requestId:crypto.randomUUID() };
+    renderModal();
+    showOverlay();
+  }
+  function openCancelModal(iso, time){
+    const key = keyOf(iso, time);
+    const entry = bookings[key];
+    modalCtx = { mode:'cancel', iso, time, key, entry };
+    renderModal();
+    showOverlay();
+  }
+
+  function renderModal(){
+    const el = document.getElementById('modal-content');
+    if (modalCtx.mode === 'book'){
+      const endLabel = minutesToTime(timeToMinutes(modalCtx.time) + modalCtx.duration);
+      el.innerHTML = `
+        <h3 id="modal-title">Book your slot</h3>
+        <div class="modal-sub">${dateLabelFor(modalCtx.iso)} · ${modalCtx.time}–${endLabel}</div>
+        <div class="field">
+          <label for="name-input">Your name</label>
+          <input type="text" id="name-input" maxlength="60" placeholder="e.g. Fred" autocomplete="off" value="${escapeHtml(modalCtx.typedName || '')}" />
+        </div>
+        <div class="field">
+          <label>Duration</label>
+          <div class="dur-toggle">
+            <button type="button" class="dur-btn ${modalCtx.duration===30?'active':''}" data-dur="30">30 min</button>
+            <button type="button" class="dur-btn ${modalCtx.duration===60?'active':''}" data-dur="60">60 min</button>
+          </div>
+        </div>
+        <div class="modal-error" id="modal-error" role="alert"></div>
+        <div class="modal-actions">
+          <button class="btn-ghost" id="modal-close">Cancel</button>
+          <button class="btn-primary" id="modal-confirm">Book it</button>
+        </div>
+      `;
+      const nameInput = document.getElementById('name-input');
+      nameInput.addEventListener('input', (e) => { modalCtx.typedName = e.target.value; modalCtx.requestId=crypto.randomUUID(); });
+      el.querySelectorAll('.dur-btn').forEach(b => b.addEventListener('click', () => {
+        if (saving) return;
+        modalCtx.requestId=crypto.randomUUID();
+        modalCtx.duration = Number(b.dataset.dur);
+        renderModal();
+      }));
+      const focusTarget = document.getElementById('name-input');
+      focusTarget.focus();
+      focusTarget.setSelectionRange(focusTarget.value.length, focusTarget.value.length);
+      document.getElementById('modal-close').addEventListener('click', closeOverlay);
+      document.getElementById('modal-confirm').addEventListener('click', confirmBooking);
+    } else {
+      const entry = modalCtx.entry;
+      el.innerHTML = `
+        <h3 id="modal-title">${dateLabelFor(modalCtx.iso)}</h3>
+        <div class="modal-sub">${modalCtx.time} · ${entry.duration} min</div>
+        <div class="booked-info">Booked by <b>${escapeHtml(entry.name)}</b></div>
+        <div class="modal-actions">
+          <button class="btn-primary" id="modal-close">Close</button>
+        </div>
+      `;
+      document.getElementById('modal-close').addEventListener('click', closeOverlay);
+    }
+  }
+
+  let saving = false;
+  async function confirmBooking(){
+    if (saving || !modalCtx || modalCtx.mode !== 'book') return;
+    const ctx = {...modalCtx};
+    const nameInput = document.getElementById('name-input');
+    const name = nameInput.value.trim().toUpperCase();
+    const errEl = document.getElementById('modal-error');
+    if (!name){ errEl.textContent = 'Add your name first.'; nameInput.focus(); return; }
+    saving = true;
+    document.getElementById('modal-confirm').disabled = true;
+    try {
+      const result=await api('',{pad:ctx.pad,iso:ctx.iso,time:ctx.time,duration:ctx.duration,name,id:ctx.requestId});
+      Object.assign(sharedPads[ctx.pad],result.pads[ctx.pad]);
+      bookings=readBookings();
+      saving=false;
+      closeOverlay();
+      render();updatePadCounts();
+      showToast("Yalla, " + name.split(' ')[0] + ", you're booked");
+      refreshAvailability();
+    } catch(e){
+      errEl.textContent=e.message;
+      if(e.status===409) refreshAvailability(true);
+      if(e.status===401){
+        authenticated=false;
+        saving=false;
+        closeOverlay();
+        document.getElementById('page-content').classList.add('locked');
+        document.getElementById('page-content').inert=true;
+        document.getElementById('lock-screen').classList.add('show');
+        document.getElementById('lock-error').textContent='Session expired. Unlock to continue.';
+        document.getElementById('lock-input').focus();
+      }
+    } finally {
+      saving = false;
+      const button = document.getElementById('modal-confirm');
+      if (button) button.disabled = false;
+    }
+  }
+
+  let returnFocus = null;
+  function showOverlay(){
+    returnFocus = document.activeElement;
+    document.getElementById('overlay').classList.add('show');
+    document.querySelectorAll('#page-content > section, #page-content > footer').forEach(el => el.inert = true);
+    document.body.style.overflow = 'hidden';
+    document.querySelector('#modal-content input, #modal-content button').focus();
+  }
+  function closeOverlay(){
+    if (saving || !modalCtx) return;
+    document.getElementById('overlay').classList.remove('show');
+    document.querySelectorAll('#page-content > section, #page-content > footer').forEach(el => el.inert = false);
+    document.body.style.overflow = '';
+    modalCtx = null;
+    if (returnFocus && returnFocus.isConnected) returnFocus.focus();
+  }
+  document.getElementById('overlay').addEventListener('click', e => { if (e.target.id === 'overlay') closeOverlay(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeOverlay();
+    if (e.key !== 'Tab' || !modalCtx) return;
+    const items = [...document.querySelectorAll('#modal-content input, #modal-content button')].filter(el => !el.disabled);
+    const first = items[0], last = items[items.length-1];
+    if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  });
+
+  let toastTimer = null;
+  function showToast(msg, isError){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.toggle('error', !!isError);
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+  }
+
+  document.getElementById('prev-week').addEventListener('click', () => { weekOffset--; selectedMobileDayIndex = 0; calendarReady=false; render(); refreshAvailability(); });
+  document.getElementById('next-week').addEventListener('click', () => { weekOffset++; selectedMobileDayIndex = 0; calendarReady=false; render(); refreshAvailability(); });
+
+  const ctaBook = document.getElementById('cta-book');
+  ctaBook.addEventListener('mouseenter', () => {
+    const pick = ACCENT_PALETTE[Math.floor(Math.random() * ACCENT_PALETTE.length)];
+    ctaBook.classList.add('hover-hit');
+    ctaBook.style.background = pick.accent;
+    ctaBook.style.color = pick.text;
+  });
+  ctaBook.addEventListener('mouseleave', () => {
+    ctaBook.classList.remove('hover-hit');
+    ctaBook.style.background = '';
+    ctaBook.style.color = '';
+  });
+  ctaBook.addEventListener('click', () => {
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce){
+      document.getElementById('booking').scrollIntoView();
+    } else {
+      document.getElementById('booking').scrollIntoView({behavior:'smooth'});
+    }
+  });
+
+  function init(){
+    initWordmark();buildPadStrip();render();updatePadCounts();
+  }
+  async function refreshAvailability(force=false){
+    if(!authenticated || document.hidden || (modalCtx && !force))return;
+    const version=++loadVersion;
+    computeWeek();
+    const from=currentWeekDays[0].iso,to=currentWeekDays[4].iso;
+    loading=true;
+    try{
+      const result=await api(`?from=${from}&to=${to}`);
+      if(version!==loadVersion)return;
+      sharedPads=result.pads;
+      bookings=readBookings();calendarReady=true;
+      calendarStatus('Shared calendar · Dubai time · Updates automatically');
+      render();updatePadCounts();
+    }catch(e){
+      if(version!==loadVersion)return;
+      calendarReady=false;
+      calendarStatus(e.message+' Retrying automatically.');
+      render();updatePadCounts();
+    }finally{if(version===loadVersion)loading=false;}
+  }
+  document.addEventListener('visibilitychange',()=>refreshAvailability());
+  setInterval(()=>{if(!loading)refreshAvailability();},15000);
+  init();
+  initLock();
+})();
+</script>
+</body>
+</html>

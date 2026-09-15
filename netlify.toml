@@ -1,0 +1,16 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+[build.environment]
+  NODE_VERSION = "22"
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+[[redirects]]
+  from = "/api/bookings"
+  to = "/.netlify/functions/bookings"
+  status = 200
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "no-store"
